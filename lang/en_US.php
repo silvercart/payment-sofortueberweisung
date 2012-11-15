@@ -38,13 +38,9 @@ $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_CANCELED']    = 'Sof
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_ERROR']       = 'Sofortüberweisung error';
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_SUCCESS']     = 'Paid via Sofortüberweisung';
 
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['API_ACCOUNTID']                          = 'Account ID';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['API_DEVELOPMENT_MODE']                   = 'API development mode';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['API_LIVE_MODE']                          = 'API live mode';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['AUTOCLOSE']                              = 'number of seconds (0 to n) after which the payer is automatically forwarded';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['CCCVC']                                  = 'Query for card verification value (CVV/CVC2)';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['CCNAME']                                 = 'Ask the name of the card or account holder';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['ENTER_DATA_AT_Sofortüberweisung']                 = 'Pay at Sofortüberweisung';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['API']                                    = 'API data';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['CONFIG_KEY']                             = 'Config key';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['ENTER_DATA_AT_Sofortüberweisung']        = 'Pay at Sofortüberweisung';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['INFOTEXT_CHECKOUT']                      = 'payment via Sofortüberweisung';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_CANCELED']                   = 'orderstatus for notification "canceled"';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_PAYED']                      = 'orderstatus for notification "payed"';
@@ -52,16 +48,6 @@ $lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDER_CONFIRMATION_SUBMIT
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['PLURALNAME']                             = 'Sofortüberweisung';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['SINGULARNAME']                           = 'Sofortüberweisung';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['SHOWLANGUAGES']                          = 'Display of the language selection in the menu of the Sofortüberweisung VT';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['URL_PAYCONFIRM_GATEWAY']                 = 'Payconfirm gateway URL';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['URL_PAYCOMPLETE_GATEWAY']                = 'Paycomplete gateway URL';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['URL_PAYINIT_GATEWAY']                    = 'Payinit gateway URL';
-
-$lang['en_US']['SilvercartPaymentSofortueberweisungError']['ERROR_1'] = 'Required attributes are missing in request';
-$lang['en_US']['SilvercartPaymentSofortueberweisungError']['ERROR_2'] = 'Not all data has been sent by Sofortüberweisung';
-$lang['en_US']['SilvercartPaymentSofortueberweisungError']['ERROR_3'] = 'A wrong accountId has been sent by Sofortüberweisung';
-$lang['en_US']['SilvercartPaymentSofortueberweisungError']['ERROR_4'] = 'A wrong token has been sent by Sofortüberweisung';
-$lang['en_US']['SilvercartPaymentSofortueberweisungError']['ERROR_5'] = 'Sofortüberweisung verification failed';
-$lang['en_US']['SilvercartPaymentSofortueberweisungError']['ERROR_6'] = 'Canceled by Sofortüberweisung';
 
 $lang['en_US']['SilvercartPaymentSofortueberweisungLanguage']['SINGULARNAME'] = 'Translation of the payment method Sofortüberweisung';
 $lang['en_US']['SilvercartPaymentSofortueberweisungLanguage']['PLURALNAME']   = 'Translations of the payment method Sofortüberweisung';

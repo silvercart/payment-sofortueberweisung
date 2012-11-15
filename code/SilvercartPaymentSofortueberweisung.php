@@ -78,7 +78,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @var array
      */
     public $successStatus = array(
-        'PayConfirm',
+        'successOrderStatus',
     );
 
     /**
@@ -87,20 +87,11 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @var array
      */
     public static $db = array(
-        'canceledOrderStatus'       => 'Int',
-        'paidOrderStatus'           => 'Int',
-        'successOrderStatus'        => 'Int',
+        'suCanceledOrderStatus'       => 'Int',
+        'suPaidOrderStatus'           => 'Int',
+        'suSuccessOrderStatus'        => 'Int',
 
-        'sofortueberweisungAccountId_Dev'      => 'VarChar(100)',
-        'sofortueberweisungAccountId_Live'     => 'VarChar(100)',
-        'sofortueberweisungPayinitGateway'     => 'VarChar(100)',
-        'sofortueberweisungPayconfirmGateway'  => 'VarChar(100)',
-        'sofortueberweisungPaycompleteGateway' => 'VarChar(100)',
-
-        'autoclose'     => 'Int',
-        'showLanguages' => 'Boolean(0)',
-        'cccvc'         => 'Boolean(1)',
-        'ccname'        => 'Boolean(1)',
+        'sofortueberweisungConfigKey' => 'VarChar(100)',
     );
 
 
@@ -119,7 +110,6 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @var array
      */
     public static $defaults = array(
-        'sofortueberweisungPayinitGateway'    => 'https://www.saferpay.com/hosting/CreatePayInit.asp'
     );
 
     /**
@@ -193,63 +183,29 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      */
     public function getCMSFields($params = null) {
         $fields     = parent::getCMSFieldsForModules($params);
-        $tabApi     = new Tab('SaferpayAPI');
-        $tabUrls    = new Tab('SaferpayURLs');
+        $tabApi     = new Tab('SofortueberweisungAPI');
+        $tabUrls    = new Tab('SofortueberweisungURLs');
 
         $fields->fieldByName('Sections')->push($tabApi);
         $fields->fieldByName('Sections')->push($tabUrls);
 
         // API Tabset ---------------------------------------------------------
         $tabApiTabset   = new TabSet('APIOptions');
-        $tabApiTabDev   = new Tab(_t('SilvercartPaymentSofortueberweisung.API_DEVELOPMENT_MODE', 'API development mode'));
-        $tabApiTabLive  = new Tab(_t('SilvercartPaymentSofortueberweisung.API_LIVE_MODE', 'API live mode'));
+        $tabApiTab      = new Tab(_t('SilvercartPaymentSofortueberweisung.API', 'API data'));
 
         // API Tabs -----------------------------------------------------------
-        $tabApiTabset->push($tabApiTabDev);
-        $tabApiTabset->push($tabApiTabLive);
+        $tabApiTabset->push($tabApiTab);
 
         $tabApi->push($tabApiTabset);
 
         // API Tab Dev fields -------------------------------------------------
-        $tabApiTabDev->setChildren(
+        $tabApiTab->setChildren(
             new FieldSet(
-                new TextField('sofortueberweisungAccountId_Dev', _t('SilvercartPaymentSofortueberweisung.API_ACCOUNTID'))
-            )
-        );
-
-        // API Tab Live fields ------------------------------------------------
-        $tabApiTabLive->setChildren(
-            new FieldSet(
-                new TextField('saferpayAccountId_Live', _t('SilvercartPaymentSofortueberweisung.API_ACCOUNTID'))
+                new TextField('sofortueberweisungConfigKey', _t('SilvercartPaymentSofortueberweisung.CONFIG_KEY'))
             )
         );
 
         // URL fields ------------------------------------------------
-        $tabUrls->push(
-            new TextField('sofortueberweisungPayinitGateway', _t('SilvercartPaymentSofortueberweisung.URL_PAYINIT_GATEWAY'))
-        );
-        $tabUrls->push(
-            new TextField('sofortueberweisungPayconfirmGateway', _t('SilvercartPaymentSofortueberweisung.URL_PAYCONFIRM_GATEWAY'))
-        );
-        $tabUrls->push(
-            new TextField('sofortueberweisungPaycompleteGateway', _t('SilvercartPaymentSofortueberweisung.URL_PAYCOMPLETE_GATEWAY'))
-        );
-        $fields->addFieldToTab(
-            'Sections.Basic',
-            new TextField('autoclose', _t('SilvercartPaymentSofortueberweisung.AUTOCLOSE'))
-        );
-        $fields->addFieldToTab(
-            'Sections.Basic',
-            new CheckboxField('showLanguages', _t('SilvercartPaymentSofortueberweisung.SHOWLANGUAGES'))
-        );
-        $fields->addFieldToTab(
-            'Sections.Basic',
-            new CheckboxField('cccvc', _t('SilvercartPaymentSofortueberweisung.CCCVC'))
-        );
-        $fields->addFieldToTab(
-            'Sections.Basic',
-            new CheckboxField('ccname', _t('SilvercartPaymentSofortueberweisung.CCNAME'))
-        );
 
         return $fields;
     }
@@ -269,15 +225,26 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @since 15.11.2012
      */
     public function processPaymentBeforeOrder() {
-        $paymentUrl = $this->getPaymentUrl();
+        $Sofort = new SofortLib_Multipay($this->sofortueberweisungConfigKey);
+        $Sofort->setSofortueberweisung();
+        $Sofort->setAmount(10);
+        $Sofort->setReason('TEST SilverCart', 'Weitere Angaben');
+        $Sofort->setSuccessUrl($this->getReturnLink());
+        $Sofort->setAbortUrl($this->getCancelLink());
+        $Sofort->setTimeoutUrl($this->getCancelLink());
+        $Sofort->setNotificationUrl($this->getNotificationUrl());
+        $Sofort->sendRequest();
 
-        if ($paymentUrl === false) {
-            return false;
+        if($Sofort->isError()) {
+            //PNAG-API didn't accept the data
+            echo $Sofort->getError();
         } else {
             $this->controller->addCompletedStep($this->controller->getCurrentStep());
             $this->controller->setCurrentStep($this->controller->getNextStep());
 
-            Director::redirect($paymentUrl);
+            //buyer must be redirected to $paymentUrl else payment cannot be successfully completed!
+            $paymentUrl = $Sofort->getPaymentUrl();
+            header('Location: '.$paymentUrl);
         }
     }
 
@@ -423,7 +390,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
         if (strtoupper($answer) != "OK") {
             $this->Log('processPaymentAfterOrder', $answer);
             $this->addError($answer);
-            $this->order->setOrderStatusByID($this->canceledOrderStatus);
+            $this->order->setOrderStatusByID($this->suCanceledOrderStatus);
             $this->order->sendConfirmationMail();
 
             return false;
@@ -630,12 +597,12 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
         parent::createRequiredOrderStatus($requiredStatus);
         parent::createLogoImageObjects($paymentLogos, 'SilvercartPaymentSofortueberweisung');
 
-        $paymentMethods = DataObject::get('SilvercartPaymentSofortueberweisung', "`paidOrderStatus`=0");
+        $paymentMethods = DataObject::get('SilvercartPaymentSofortueberweisung', "`suPaidOrderStatus`=0");
         if ($paymentMethods) {
             foreach ($paymentMethods as $paymentMethod) {
-                $paymentMethod->paidOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "`Code`='payed'")->ID;
-                $paymentMethod->successOrderStatus = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_success'")->ID;
-                $paymentMethod->failedOrderStatus  = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_error'")->ID;
+                $paymentMethod->suPaidOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "`Code`='payed'")->ID;
+                $paymentMethod->suSuccessOrderStatus = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_success'")->ID;
+                $paymentMethod->suFailedOrderStatus  = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_error'")->ID;
 
                 $paymentMethod->setField('sofortueberweisungPayinitGateway',     'https://www.sofortueberweisung.com/hosting/CreatePayInit.asp');
                 $paymentMethod->setField('sofortueberweisungPayconfirmGateway',  'https://www.sofortueberweisung.com/hosting/VerifyPayConfirm.asp');
