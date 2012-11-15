@@ -24,7 +24,7 @@
  * @ignore
  */
 
-i18n::include_locale_file('silvercart_payment_saferpay', 'en_US');
+i18n::include_locale_file('silvercart_payment_sofortueberweisung', 'en_US');
 
 global $lang;
 
