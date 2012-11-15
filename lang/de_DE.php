@@ -1,0 +1,67 @@
+<?php
+/**
+ * Copyright 2012 pixeltricks GmbH
+ *
+ * This file is part of SilvercartPrepaymentPayment.
+ *
+ * SilvercartPaypalPayment is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * SilvercartPrepaymentPayment is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with SilvercartPrepaymentPayment.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * German (Germany) language pack
+ *
+ * @package Silvercart
+ * @subpackage i18n
+ * @ignore
+ */
+
+i18n::include_locale_file('silvercart_payment_saferpay', 'en_US');
+
+global $lang;
+
+if (array_key_exists('de_DE', $lang) && is_array($lang['de_DE'])) {
+    $lang['de_DE'] = array_merge($lang['en_US'], $lang['de_DE']);
+} else {
+    $lang['de_DE'] = $lang['en_US'];
+}
+
+$lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_CANCELED']    = 'Sofortüberweisung abgebrochen';
+$lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_ERROR']       = 'Sofortüberweisung Fehler';
+$lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_SUCCESS']     = 'Bezahlt via Sofortüberweisung';
+
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['API_ACCOUNTID']                          = 'Account ID';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['API_DEVELOPMENT_MODE']                   = 'API Entwicklungsmodus';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['API_LIVE_MODE']                          = 'API Live Modus';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['AUTOCLOSE']                              = 'Anzahl Sekunden (0 bis n) bis zur automatischen Weiterleitung nach erfolgreicher Zahlung';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['CCCVC']                                  = 'Prüfsumme der Kreditkarte abfragen';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['CCNAME']                                 = 'Name des Kreditkartenbesitzers abfragen';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['ENTER_DATA_AT_Sofortüberweisung']        = 'Bezahlung bei Sofortüberweisung durchführen';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['INFOTEXT_CHECKOUT']                      = 'Die Zahlung erfolgt per Sofortüberweisung';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE'] = 'Kaufen & weiter zur Bezahlung bei Sofortüberweisung';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_CANCELED']                   = 'Bestellstatus für Meldung "abgebrochen"';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_PAYED']                      = 'Bestellstatus für Meldung "bezahlt"';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['PLURALNAME']                             = 'Sofortüberweisung';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['SINGULARNAME']                           = 'Sofortüberweisung';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['SHOWLANGUAGES']                          = 'Anzeige der Sprachauswahl im Sofortüberweisung VT Menü';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['URL_PAYCONFIRM_GATEWAY']                 = 'Payconfirm Gateway URL';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['URL_PAYCOMPLETE_GATEWAY']                = 'PaycompleteGateway URL';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['URL_PAYINIT_GATEWAY']                    = 'Payinit Gateway URL';
+
+$lang['de_DE']['SilvercartPaymentSofortueberweisungError']['ERROR_1'] = 'Benötigte Attribute fehlen in Request';
+$lang['de_DE']['SilvercartPaymentSofortueberweisungError']['ERROR_2'] = 'Es wurden nicht alle Daten von Sofortüberweisung gesendet';
+$lang['de_DE']['SilvercartPaymentSofortueberweisungError']['ERROR_3'] = 'Es wurde eine falsche AccountID von Sofortüberweisung gesendet';
+$lang['de_DE']['SilvercartPaymentSofortueberweisungError']['ERROR_4'] = 'Es wurde ein falsches Token von Sofortüberweisung gesendet';
+$lang['de_DE']['SilvercartPaymentSofortueberweisungError']['ERROR_5'] = 'Verifikation bei Sofortüberweisung ist fehlgeschlagen';
+$lang['de_DE']['SilvercartPaymentSofortueberweisungError']['ERROR_6'] = 'Abbruch durch Sofortüberweisung';
+
+$lang['de_DE']['SilvercartPaymentSofortueberweisungLanguage']['SINGULARNAME'] = 'Übersetzung der Zahlart Sofortüberweisung';
+$lang['de_DE']['SilvercartPaymentSofortueberweisungLanguage']['PLURALNAME']   = 'Übersetzungen der Zahlart Sofortüberweisung';
