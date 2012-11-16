@@ -49,8 +49,7 @@ class SilvercartPaymentSofortueberweisungOrderPlugin extends DataObjectDecorator
         $order                  = $arguments[0];
         $silvercartShoppingCart = $arguments[1];
 
-        $order->sofortueberweisungIdentifier  = $silvercartShoppingCart->getSofortueberweisungId();
-        $order->sofortueberweisungToken       = $silvercartShoppingCart->getSofortueberweisungToken();
+        $order->sofortueberweisungTransactionID  = $silvercartShoppingCart->getSofortueberweisungTransactionID();
         $order->write();
     }
 }

@@ -44,10 +44,22 @@ class SilvercartPaymentSofortueberweisungOrder extends DataObjectDecorator {
     public function extraStatics() {
         return array(
             'db' => array(
-                'sofortueberweisungToken'      => 'VarChar(150)',
-                'sofortueberweisungIdentifier' => 'VarChar(150)'
+                'sofortueberweisungTransactionID' => 'VarChar(150)',
+                'sofortueberweisungReason'        => 'VarChar(27)'
             )
         );
+    }
+
+    /**
+     * Returns the Sofortueberweisung reason.
+     *
+     * @return string
+     *
+     * @author Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 16.11.2012
+     */
+    public function getSofortueberweisungReason() {
+        return $this->owner->getField('sofortueberweisungReason');
     }
 
     /**
@@ -58,49 +70,37 @@ class SilvercartPaymentSofortueberweisungOrder extends DataObjectDecorator {
      * @author Sascha Koehler <skoehler@pixeltricks.de>
      * @since 15.11.2012
      */
-    public function getSofortueberweisungID() {
-        return $this->owner->getField('sofortueberweisungIdentifier');
-    }
-
-    /**
-     * Returns the Sofortueberweisung token.
-     *
-     * @return string
-     *
-     * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @since 15.11.2012
-     */
-    public function getSofortueberweisungToken() {
-        return $this->owner->getField('sofortueberweisungToken');
+    public function getSofortueberweisungTransactionID() {
+        return $this->owner->getField('sofortueberweisungTransactionID');
     }
 
     /**
      * Writes the given ID into the shoppingcart.
      *
-     * @param string $sofortueberweisungID The ID to save
+     * @param string $reason The ID to save
      *
      * @return void
      *
      * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @since 15.11.2012
+     * @since 16.11.2012
      */
-    public function saveSofortueberweisungID($sofortueberweisungID) {
-        $this->owner->setField('sofortueberweisungIdentifier', (string) $sofortueberweisungID);
+    public function saveSofortueberweisungReason($reason) {
+        $this->owner->setField('sofortueberweisungReason', (string) $reason);
         $this->owner->write();
     }
 
     /**
-     * Writes the given token into the shoppingcart.
+     * Writes the given ID into the shoppingcart.
      *
-     * @param string $sofortueberweisungToken The token to save
+     * @param string $transactionID The ID to save
      *
      * @return void
      *
      * @author Sascha Koehler <skoehler@pixeltricks.de>
      * @since 15.11.2012
      */
-    public function saveSofortueberweisungToken($sofortueberweisungToken) {
-        $this->owner->setField('sofortueberweisungToken', (string) $sofortueberweisungToken);
+    public function saveSofortueberweisungTransactionID($transactionID) {
+        $this->owner->setField('sofortueberweisungTransactionID', (string) $transactionID);
         $this->owner->write();
     }
 }

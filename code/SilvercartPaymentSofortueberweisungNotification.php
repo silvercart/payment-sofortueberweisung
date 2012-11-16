@@ -65,8 +65,25 @@ class SilvercartPaymentSofortueberweisungNotification extends DataObject {
         );
 
         if ($paymentModule) {
-            $paymentModule->Log('SilvercartPaymentSofortueberweisungNotification', 'Notification received');
-            $paymentModule->Log('SilvercartPaymentSofortueberweisungNotification', var_export($_REQUEST, true));
+            require_once("../silvercart_payment_sofortueberweisung/thirdparty/sofortlib/sofortLib.php");
+
+            $paymentModule->Log('SilvercartPaymentSofortueberweisungNotification', '--- Notification received --------------------------------------------------------------------');
+
+            $notification = new SofortLib_Notification();
+            $notification->getNotification();
+
+            $transactionId = $notification->getTransactionId();
+
+            $paymentModule->Log('SilvercartPaymentSofortueberweisungNotification', 'Notification time is '.$notification->getTime());
+            $paymentModule->Log('SilvercartPaymentSofortueberweisungNotification', 'TransactionId is '.$transactionId);
+
+            // fetch some information for the transaction id retrieved above
+            $transactionData = new SofortLib_TransactionData($paymentModule->sofortueberweisungConfigKey);
+            $transactionData->setTransaction($transactionId);
+            $transactionData->sendRequest();
+
+            $paymentModule->Log('SilvercartPaymentSofortueberweisungNotification', "Amount: ".$transactionData->getAmount());
+            $paymentModule->Log('SilvercartPaymentSofortueberweisungNotification', "Status: ".$transactionData->getStatus());
         }
     }
 }

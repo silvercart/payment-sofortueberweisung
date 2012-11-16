@@ -34,20 +34,20 @@ global $lang;
 
 
 
-$lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_CANCELED']    = 'Sofortüberweisung canceled';
-$lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_ERROR']       = 'Sofortüberweisung error';
-$lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_SUCCESS']     = 'Paid via Sofortüberweisung';
+$lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_CANCELED'] = 'Sofortbanking canceled';
+$lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_ERROR']    = 'Sofortbanking error';
+$lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_SUCCESS']  = 'Paid via Sofortbanking';
 
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['API']                                    = 'API data';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['CONFIG_KEY']                             = 'Config key';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['ENTER_DATA_AT_Sofortüberweisung']        = 'Pay at Sofortüberweisung';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['INFOTEXT_CHECKOUT']                      = 'payment via Sofortüberweisung';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['ENTER_DATA_AT_SOFORTUEBERWEISUNG']       = 'Pay at Sofortbanking';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['INFOTEXT_CHECKOUT']                      = 'payment via Sofortbanking';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_CANCELED']                   = 'orderstatus for notification "canceled"';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_PAYED']                      = 'orderstatus for notification "payed"';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE'] = 'Proceed to payment via Sofortüberweisung';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['PLURALNAME']                             = 'Sofortüberweisung';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['SINGULARNAME']                           = 'Sofortüberweisung';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['SHOWLANGUAGES']                          = 'Display of the language selection in the menu of the Sofortüberweisung VT';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE'] = 'Proceed to payment via Sofortbanking';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['PLURALNAME']                             = 'Sofortbanking';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['SINGULARNAME']                           = 'Sofortbanking';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['SHOWLANGUAGES']                          = 'Display of the language selection in the menu of the Sofortbanking VT';
 
-$lang['en_US']['SilvercartPaymentSofortueberweisungLanguage']['SINGULARNAME'] = 'Translation of the payment method Sofortüberweisung';
-$lang['en_US']['SilvercartPaymentSofortueberweisungLanguage']['PLURALNAME']   = 'Translations of the payment method Sofortüberweisung';
+$lang['en_US']['SilvercartPaymentSofortueberweisungLanguage']['SINGULARNAME'] = 'Translation of the payment method Sofortbanking';
+$lang['en_US']['SilvercartPaymentSofortueberweisungLanguage']['PLURALNAME']   = 'Translations of the payment method Sofortbanking';

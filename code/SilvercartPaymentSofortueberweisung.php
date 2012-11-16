@@ -225,26 +225,103 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @since 15.11.2012
      */
     public function processPaymentBeforeOrder() {
+        require_once("../silvercart_payment_sofortueberweisung/thirdparty/sofortlib/sofortLib.php");
+
+        $shoppingCart = $this->getShoppingCart();
+        $reason       = $this->getReason($this->createSofortueberweisungToken());
+
+        $shoppingCart->saveSofortueberweisungReason($reason);
+
         $Sofort = new SofortLib_Multipay($this->sofortueberweisungConfigKey);
         $Sofort->setSofortueberweisung();
-        $Sofort->setAmount(10);
-        $Sofort->setReason('TEST SilverCart', 'Weitere Angaben');
+        $Sofort->setAmount($shoppingCart->getAmountTotal());
+        $Sofort->setReason($reason);
         $Sofort->setSuccessUrl($this->getReturnLink());
         $Sofort->setAbortUrl($this->getCancelLink());
         $Sofort->setTimeoutUrl($this->getCancelLink());
         $Sofort->setNotificationUrl($this->getNotificationUrl());
+
+        /*
+        // Cart positions
+        foreach ($shoppingCart->SilvercartShoppingCartPositions() as $position) {
+            $Sofort->addSofortrechnungItem(
+                $position->SilvercartProduct()->ID,
+                $position->SilvercartProduct()->ProductNumberShop,
+                $position->getTitle(),
+                $position->getPrice(true)->getAmount(),
+                0, // type
+                $position->getCartDescription(),
+                $position->Quantity,
+                $position->SilvercartProduct()->getTaxRate()
+            );
+        }
+
+        // add payment and shipping costs
+        $taxes = $shoppingCart->getTaxRatesWithoutFeesAndCharges();
+        $mostValuableTaxrate = $shoppingCart->getMostValuableTaxRate($taxes);
+
+        $Sofort->addSofortrechnungItem(
+            99999,
+            0,
+            "test 1 ".$shoppingCart->CarrierAndShippingMethodTitle(),
+            round((float) $shoppingCart->HandlingCostShipment()->getAmount(), 2),
+            1, // type
+            '',
+            0,
+            $mostValuableTaxrate->getTaxRate()
+        );
+
+        $Sofort->addSofortrechnungItem(
+            99999,
+            0,
+            "test 2 "._t('SilvercartPaymentMethod.SINGULARNAME'),
+            round((float) $shoppingCart->HandlingCostPayment()->getAmount(), 2),
+            1, // type
+            '',
+            0,
+            $mostValuableTaxrate->getTaxRate()
+        );
+
+        // add address data
+        $invoiceAddress  = $this->getInvoiceAddress();
+        $shippingAddress = $this->getShippingAddress();
+        $Sofort->setSofortrechnungInvoiceAddress(
+            $invoiceAddress->FirstName,
+            $invoiceAddress->Surname,
+            $invoiceAddress->Street,
+            $invoiceAddress->StreetNumber,
+            $invoiceAddress->Postcode,
+            $invoiceAddress->City,
+            $invoiceAddress->Salutation,
+            $invoiceAddress->SilvercartCountry()->ISO2
+        );
+        $Sofort->setSofortrechnungShippingAddress(
+            $shippingAddress->FirstName,
+            $shippingAddress->Surname,
+            $shippingAddress->Street,
+            $shippingAddress->StreetNumber,
+            $shippingAddress->Postcode,
+            $shippingAddress->City,
+            $shippingAddress->Salutation,
+            $shippingAddress->SilvercartCountry()->ISO2
+        );
+        */
+
         $Sofort->sendRequest();
 
         if($Sofort->isError()) {
             //PNAG-API didn't accept the data
-            echo $Sofort->getError();
+            $this->addError($Sofort->getError());
         } else {
+            $shoppingCart->saveSofortueberweisungTransactionID($Sofort->getTransactionID());
+
             $this->controller->addCompletedStep($this->controller->getCurrentStep());
             $this->controller->setCurrentStep($this->controller->getNextStep());
 
             //buyer must be redirected to $paymentUrl else payment cannot be successfully completed!
             $paymentUrl = $Sofort->getPaymentUrl();
             header('Location: '.$paymentUrl);
+            exit();
         }
     }
 
@@ -258,108 +335,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @since 15.11.2012
      */
     public function processReturnJumpFromPaymentProvider() {
-        $shoppingCart            = $this->getShoppingCart();
-        $error                   = 0;
-        $msgType                 = null;
-        $sofortueberweisungId    = null;
-        $sofortueberweisungToken = null;
-        $providerId              = null;
-        $providerName            = null;
-        $accountId               = null;
-        $signature               = null;
-        $data                    = null;
-        $eci                     = null;
-        $ecimsg                  = null;
-
-        if (array_key_exists('SIGNATURE', $_REQUEST)) {
-            $signature = urldecode($_REQUEST['SIGNATURE']);
-        } else {
-            $error = 1;
-        }
-        if (array_key_exists('DATA', $_REQUEST)) {
-            $data = urldecode($_REQUEST['DATA']);
-        } else {
-            $error = 1;
-        }
-
-        if ($error == 0) {
-            $xml = new SimpleXMLElement(urldecode($_REQUEST['DATA']));
-
-            if ($xml['ID']) {
-                $saferpayId = $xml['ID'];
-            } else {
-                $error = 2;
-            }
-            if ($xml['MSGTYPE']) {
-                $msgType = $xml['MSGTYPE'];
-            } else {
-                $error = 2;
-            }
-            if ($xml['ORDERID']) {
-                $saferpayToken = $xml['ORDERID'];
-            } else {
-                $error = 2;
-            }
-            if ($xml['PROVIDERID']) {
-                $providerId = $xml['PROVIDERID'];
-            } else {
-                $error = 2;
-            }
-            if ($xml['PROVIDERNAME']) {
-                $providerName = $xml['PROVIDERNAME'];
-            } else {
-                $error = 2;
-            }
-            if ($xml['ACCOUNTID']) {
-                $accountId = $xml['ACCOUNTID'];
-            } else {
-                $error = 2;
-            }
-            if ($xml['ECI']) {
-                $eci = $xml['ECI'];
-            }
-
-            if ($accountId != $this->getAccountId()) {
-                $error = 3;
-            }
-            if ($saferpayToken != $shoppingCart->getSaferpayToken()) {
-                $error = 4;
-            }
-
-            if ($error == 0) {
-                if (in_array($msgType, $this->successStatus)) {
-                    $payconfirm_url = $this->getConfirmationUrl($data, $signature);
-
-                    $cs = curl_init($payconfirm_url);
-                    curl_setopt($cs, CURLOPT_PORT, 443); // set option for outgoing SSL requests via CURL
-                    curl_setopt($cs, CURLOPT_SSL_VERIFYPEER, false); // ignore SSL-certificate-check - session still SSL-safe
-                    curl_setopt($cs, CURLOPT_HEADER, 0); // no header in output
-                    curl_setopt ($cs, CURLOPT_RETURNTRANSFER, true); // receive returned characters
-
-                    $verification = curl_exec($cs);
-                    curl_close($cs);
-
-                    if (strtoupper(substr($verification, 0, 3)) != "OK:") {
-                        $error = 5;
-                    } else {
-                        $shoppingCart->saveSaferpayID($saferpayId);
-                    }
-                } else {
-                    $error = 6;
-                }
-            }
-        }
-
-        if ($error > 0) {
-            $this->Log('processReturnJumpFromPaymentProvider', var_export($_REQUEST, true));
-            $errorMsg = _t('SilvercartPaymentSofortueberweisungError.ERROR_'.$error);
-
-            $this->addError($errorMsg);
-
-            return false;
-        } else {
-            parent::processReturnJumpFromPaymentProvider();
-        }
+        $this->controller->NextStep();
     }
 
     /**
@@ -373,33 +349,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @since 15.11.2012
      */
     public function processPaymentAfterOrder($orderObj = array()) {
-        $sofortueberweisungId     = $this->order->getSofortueberweisungId();
-        $sofortueberweisungToken  = $this->order->getSofortueberweisungToken();
-
-        $paycomplete_url = $this->getCompleteUrl($sofortueberweisungId, null);
-
-        $cs = curl_init($paycomplete_url);
-        curl_setopt($cs, CURLOPT_PORT, 443); // set option for outgoing SSL requests via CURL
-        curl_setopt($cs, CURLOPT_SSL_VERIFYPEER, false); // ignore SSL-certificate-check - session still SSL-safe
-        curl_setopt($cs, CURLOPT_HEADER, 0); // no header in output
-        curl_setopt ($cs, CURLOPT_RETURNTRANSFER, true); // receive returned characters
-
-        $answer = curl_exec($cs);
-        curl_close($cs);
-
-        if (strtoupper($answer) != "OK") {
-            $this->Log('processPaymentAfterOrder', $answer);
-            $this->addError($answer);
-            $this->order->setOrderStatusByID($this->suCanceledOrderStatus);
-            $this->order->sendConfirmationMail();
-
-            return false;
-        } else {
-            $this->order->setOrderStatusByID($this->successOrderStatus);
-            $this->order->sendConfirmationMail();
-
-            parent::processPaymentAfterOrder($this->order);
-        }
+        return parent::processPaymentAfterOrder($orderObj);
     }
 
     /**
@@ -419,6 +369,27 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
     // ------------------------------------------------------------------------
     // payment module specific methods
     // ------------------------------------------------------------------------
+
+    /**
+     * Generates a "Verwendungszweck" identifier.
+     *
+     * @param int $key An identifier like shoppingcart or order ID
+     *
+     * @return string
+     *
+     * @author Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 16.11.2012
+     */
+    public function getReason($key) {
+        $key = ($key^0x47cb8a8c) ^ ($key<<12);
+        $key = ($key^0x61a988bc) ^ ($key>>19);
+        $key = ($key^0x78d2a3c8) ^ ($key<<5);
+        $key = ($key^0x5972b1be) ^ ($key<<9);
+        $key = ($key^0x2ea72dfe) ^ ($key<<3);
+        $key = ($key^0x5ff1057d) ^ ($key>>16);
+
+        return $key;
+    }
 
     /**
      * Set the title for the submit button on the order confirmation step.
@@ -449,131 +420,6 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
     }
 
     /**
-     * Returns the payment URL
-     *
-     * @param string $id    The ID for the request
-     * @param string $token The token for the request
-     *
-     * @return string
-     *
-     * @author Sascha Koehler <skoehler@standardized.de>
-     * @since 15.11.2012
-     */
-    protected function getCompleteUrl($id, $token) {
-        $attributes  = "?ACCOUNTID=".$this->getAccountId();
-        $attributes .= "&ID=".urlencode($id);
-        $attributes .= "&TOKEN=".urlencode($token);
-
-        $paycomplete_url = $this->sofortueberweisungPaycompleteGateway.$attributes;
-
-        // **************************************************
-        // * Special for testaccount: Passwort for hosting-capture neccessary.
-        // * Not needed for standard-saferpay-eCommerce-accounts
-        // **************************************************
-        if (substr($this->getAccountId(), 0, 6) == "99867-") {
-            $paycomplete_url .= "&spPassword=XAjc3Kna";
-        }
-
-        return $paycomplete_url;
-    }
-
-    /**
-     * Returns the payment URL
-     *
-     * @param string $data      The data string from saferpay
-     * @param string $signature The signature string from saferpay
-     *
-     * @return string
-     *
-     * @author Sascha Koehler <skoehler@standardized.de>
-     * @since 15.11.2012
-     */
-    protected function getConfirmationUrl($data, $signature) {
-        $attributes  = "?DATA=".urlencode($data);
-        $attributes .= "&SIGNATURE=".urlencode($signature);
-
-        $payconfirm_url = $this->sofortueberweisungPayconfirmGateway.$attributes;
-
-        return $payconfirm_url;
-    }
-
-    /**
-     * Returns the payment URL
-     *
-     * @return string
-     *
-     * @author Sascha Koehler <skoehler@standardized.de>
-     * @since 15.11.2012
-     */
-    protected function getPaymentUrl() {
-        $checkoutData = $this->controller->getCombinedStepData();
-        $shoppingCart = $this->getShoppingCart();
-
-        if (array_key_exists('ShippingMethod', $checkoutData)) {
-            $shoppingCart->setShippingMethodID($checkoutData['ShippingMethod']);
-        }
-        if (array_key_exists('PaymentMethod', $checkoutData)) {
-            $shoppingCart->setPaymentMethodID($checkoutData['PaymentMethod']);
-        }
-
-        $totalAmount             = $shoppingCart->getAmountTotal();
-        $sofortueberweisungToken = $this->createSofortueberweisungToken();
-        $shoppingCart->saveSofortueberweisungToken($sofortueberweisungToken);
-
-        $showLanguages = $this->showLanguages ? 'yes' : 'no';
-        $cccvc         = $this->cccvc ?  'yes' : 'no';
-        $ccname        = $this->ccname ? 'yes' : 'no';
-
-        // Mandatory attributes
-        $attributes  = "?ACCOUNTID=".       $this->getAccountId();
-        $attributes .= "&AMOUNT=".          $totalAmount->getAmount() * 100;
-        $attributes .= "&CURRENCY=".        $totalAmount->getCurrency();
-        $attributes .= "&DELIVERY=no";
-        $attributes .= "&DESCRIPTION=".     urlencode($this->getDescription());
-        $attributes .= "&SUCCESSLINK=".     $this->getReturnLink();
-        $attributes .= "&FAILLINK=".        $this->getCancelLink();
-        $attributes .= "&BACKLINK=".        $this->getCancelLink();
-        $attributes .= "&NOTIFIYURL=".      $this->getNotificationUrl();
-        $attributes .= "&AUTOCLOSE=".       (int) $this->autoclose;
-        $attributes .= "&SHOWLANGUAGES=".   $showLanguages;
-        $attributes .= "&CCCVC=".           $cccvc;
-        $attributes .= "&CCNAME=".          $ccname;
-
-        // Shop specific attributes
-        $attributes .= "&ORDERID=".urlencode($sofortueberweisungToken);
-
-        $payinit_url = $this->sofortueberweisungPayinitGateway.$attributes;
-
-        // Create CURL session
-        $cs = curl_init($payinit_url);
-        
-        // Set CURL session options
-        curl_setopt($cs, CURLOPT_PORT, 443);                // set option for outgoing SSL requests via CURL
-        curl_setopt($cs, CURLOPT_SSL_VERIFYPEER, false);    // ignore SSL-certificate-check - session still SSL-safe
-        curl_setopt($cs, CURLOPT_HEADER, 0);                // no header in output
-        curl_setopt($cs, CURLOPT_RETURNTRANSFER, true);     // receive returned characters
-        
-        // Execute CURL session
-        $paymentUrl = curl_exec($cs);
-        
-        // Close CURL session
-        $ce = curl_error($cs);
-        curl_close($cs);
-        
-        // Stop if CURL is not working
-        if (strtolower(substr($paymentUrl, 0, 24)) != "https://www.sofortueberweisung.de") {
-            $msg = "<p>PHP-CURL is not working correctly for outgoing SSL-calls on your server:<br/>";
-            $msg .= htmlentities($paymentUrl)."<br/>";
-            $msg .= htmlentities($ce)."</p>";
-            $this->addError($msg);
-
-            return false;
-        }
-        
-        return $paymentUrl;
-    }
-
-    /**
      * Creates and relates required order status and logo images.
      *
      * @return void
@@ -585,13 +431,13 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
         parent::requireDefaultRecords();
 
         $requiredStatus = array(
-            'payed'             => _t('SilvercartOrderStatus.PAYED'),
-            'saferpay_success'  => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_SUCCESS'),
-            'saferpay_error'    => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_ERROR'),
-            'saferpay_canceled' => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_CANCELED')
+            'payed'                       => _t('SilvercartOrderStatus.PAYED'),
+            'sofortueberweisung_success'  => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_SUCCESS'),
+            'sofortueberweisung_error'    => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_ERROR'),
+            'sofortueberweisung_canceled' => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_CANCELED')
         );
         $paymentLogos = array(
-            'Sofortueberweisung'  => SilvercartTools::getBaseURLSegment().'/silvercart_payment_sofortueberweisung/images/sofortueberweisung.jpg',
+            'Sofortueberweisung'  => SilvercartTools::getBaseURLSegment().'/silvercart_payment_sofortueberweisung/images/sofortueberweisung.png',
         );
 
         parent::createRequiredOrderStatus($requiredStatus);
@@ -603,14 +449,6 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
                 $paymentMethod->suPaidOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "`Code`='payed'")->ID;
                 $paymentMethod->suSuccessOrderStatus = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_success'")->ID;
                 $paymentMethod->suFailedOrderStatus  = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_error'")->ID;
-
-                $paymentMethod->setField('sofortueberweisungPayinitGateway',     'https://www.sofortueberweisung.com/hosting/CreatePayInit.asp');
-                $paymentMethod->setField('sofortueberweisungPayconfirmGateway',  'https://www.sofortueberweisung.com/hosting/VerifyPayConfirm.asp');
-                $paymentMethod->setField('sofortueberweisungPaycompleteGateway', 'https://www.sofortueberweisung.com/hosting/PayComplete.asp');
-                $paymentMethod->setField('autoclose',                  0);
-                $paymentMethod->setField('showLanguages',              0);
-                $paymentMethod->setField('cccvc',                      1);
-                $paymentMethod->setField('ccname',                     1);
 
                 $paymentMethod->write();
             }
