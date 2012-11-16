@@ -309,11 +309,16 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
 
         $Sofort->sendRequest();
 
-        if($Sofort->isError()) {
+        if ($Sofort->isError()) {
             //PNAG-API didn't accept the data
             $this->addError($Sofort->getError());
         } else {
-            $shoppingCart->saveSofortueberweisungTransactionID($Sofort->getTransactionID());
+            $transactionId = $Sofort->getTransactionID();
+            $shoppingCart->saveSofortueberweisungTransactionID($transactionId);
+            $paymentStatus = new SilvercartPaymentSofortueberweisungPaymentStatus();
+            $paymentStatus->status          = 'created';
+            $paymentStatus->transactionId   = $transactionId;
+            $paymentStatus->write();
 
             $this->controller->addCompletedStep($this->controller->getCurrentStep());
             $this->controller->setCurrentStep($this->controller->getNextStep());

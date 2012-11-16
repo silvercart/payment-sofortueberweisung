@@ -17,40 +17,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with SilverCart.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @package SilvercartPaymentSaferpay
- * @subpackage Plugins
+ * @package SilvercartPaymentSofortueberweisung
+ * @subpackage Base
  */
 
 /**
  * Order plugin.
  *
  * @package SilvercartPaymentSofortueberweisung
- * @subpackage Plugins
+ * @subpackage Base
  * @author Sascha Koehler <skoehler@pixeltricks.de>
- * @since 15.11.2012
+ * @since 16.11.2012
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License
  * @copyright 2012 pixeltricks GmbH
  */
-class SilvercartPaymentSofortueberweisungOrderPlugin extends DataObjectDecorator {
+class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
 
     /**
-     * Injects the Sofortueberweisung information from the shopping cart into the order
-     * object.
+     * Attributes.
      *
-     * @param array           $arguments        Arguments
-     * @param SilvercartOrder &$silvercartOrder The SilverCart order object
-     *
-     * @return void
-     *
-     * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @since 15.11.2012
+     * @var array
      */
-    public function pluginCreateFromShoppingCart($arguments, &$silvercartOrder) {
-        $order                  = $arguments[0];
-        $silvercartShoppingCart = $arguments[1];
+    public static $db = array(
+        'transactionId' => 'VarChar(100)',
+        'status'        => "Enum('created,pending,received,error,loss','pending')",
+        'queued'        => 'Boolean(0)'
+    );
 
-        $order->sofortueberweisungTransactionID = $silvercartShoppingCart->getSofortueberweisungTransactionID();
-        $order->sofortueberweisungReason        = $silvercartShoppingCart->getSofortueberweisungReason();
-        $order->write();
-    }
+
 }
