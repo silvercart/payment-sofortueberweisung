@@ -36,6 +36,7 @@ if (array_key_exists('de_DE', $lang) && is_array($lang['de_DE'])) {
 
 $lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_CANCELED']    = 'SOFORT Überweisung abgebrochen';
 $lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_ERROR']       = 'SOFORT Überweisung Fehler';
+$lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_LOSS']        = 'SOFORT Überweisung Verlust';
 $lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_SUCCESS']     = 'Bezahlt via SOFORT Überweisung';
 
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['API']                                    = 'API Daten';

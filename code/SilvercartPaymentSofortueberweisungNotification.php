@@ -84,6 +84,13 @@ class SilvercartPaymentSofortueberweisungNotification extends DataObject {
 
             $paymentModule->Log('SilvercartPaymentSofortueberweisungNotification', "Amount: ".$transactionData->getAmount());
             $paymentModule->Log('SilvercartPaymentSofortueberweisungNotification', "Status: ".$transactionData->getStatus());
+
+            $paymentStatus = new SilvercartPaymentSofortueberweisungPaymentStatus();
+            $paymentStatus->createEvent(
+                $transactionId,
+                $transactionData->getStatus(),
+                $transactionData->getAmount()
+            );
         }
     }
 }

@@ -42,10 +42,11 @@ class SilvercartPaymentSofortueberweisungCheckoutFormStep2 extends SilvercartChe
      * @since 15.11.2012
      */
     public function process() {
-        if (parent::process()) {
-            if (!$this->paymentMethodObj->processReturnJumpFromPaymentProvider()) {
-                return $this->renderError();
-            }
+        if ($this->paymentMethodObj->processReturnJumpFromPaymentProvider()) {
+            $this->controller->addCompletedStep();
+            $this->controller->NextStep();
+        } else {
+            return $this->renderError();
         }
     }
 }

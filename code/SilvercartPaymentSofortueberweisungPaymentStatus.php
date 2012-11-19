@@ -22,7 +22,7 @@
  */
 
 /**
- * Order plugin.
+ * This is a queue system for status reports from Sofortueberweisung.
  *
  * @package SilvercartPaymentSofortueberweisung
  * @subpackage Base
@@ -34,6 +34,14 @@
 class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
 
     /**
+     * Cache for the order object for this status.
+     *
+     * @var mixed boolean false|SilvercartOrder
+     * @since 19.11.2012
+     */
+    protected $orderObject = false;
+
+    /**
      * Attributes.
      *
      * @var array
@@ -41,8 +49,119 @@ class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
     public static $db = array(
         'transactionId' => 'VarChar(100)',
         'status'        => "Enum('created,pending,received,error,loss','pending')",
+        'amount'        => 'Money',
         'queued'        => 'Boolean(0)'
     );
 
+    /**
+     * Set a payment status for the given transaction ID. Optionally an amount can
+     * be given.
+     *
+     * @param string $transactionId The transaction ID
+     * @param string $status        The status of the transaction
+     * @param float  $amount        Optional the amount
+     *
+     * @return void
+     *
+     * @author Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 19.11.2012
+     */
+    public function createEvent($transactionId, $status, $amount = 0.0) {
+        // -------------------------------------------------------------------
+        // Get currency
+        // -------------------------------------------------------------------
+        $order = DataObject::get_one(
+            'SilvercartOrder',
+            sprintf(
+                "sofortueberweisungTransactionID = '%s'",
+                $transactionId
+            )
+        );
 
+        if ($order) {
+            $currency = $order->AmountTotal()->getCurrency();
+        } else {
+            $cart = DataObject::get_one(
+                'SilvercartShoppingCart',
+                sprintf(
+                    "sofortueberweisungTransactionID = '%s'",
+                    $transactionId
+                )
+            );
+
+            if ($cart) {
+                $currency = $cart->getAmountTotal()->getCurrency();
+            } else {
+                $member = Member::currentUser();
+
+                if ($member &&
+                    $member->SilvercartShoppingCartID > 0) {
+
+                    $currency = $member->SilvercartShoppingCart()->getAmountTotal()->getCurrency();
+                }
+            }
+        }
+
+        if (!$currency) {
+            $currency = SilvercartConfig::DefaultCurrency();
+        }
+
+        // -------------------------------------------------------------------
+        // Write event
+        // -------------------------------------------------------------------
+        $this->transactionId  = $transactionId;
+        $this->status         = $status;
+        $this->amountAmount   = $amount;
+        $this->amountCurrency = $currency;
+        $this->write();
+    }
+
+    /**
+     * Returns wether the given transactionId has an order object.
+     *
+     * @param string $transactionId The transaction ID to check for
+     *
+     * @return boolean
+     *
+     * @author Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 19.11.2012
+     */
+    public function hasOrderObject($transactionId) {
+        $hasOrder = false;
+        $order    = $this->getOrderObject($transactionId);
+
+        if ($order) {
+            $hasOrder = true;
+        }
+
+        return $hasOrder;
+    }
+
+    /**
+     * Returns an order object for the given transactionId.
+     *
+     * @param string $transactionId The transaction ID
+     *
+     * @return SilvercartOrder
+     *
+     * @author Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 19.11.2012
+     */
+    public function getOrderObject($transactionId) {
+        if ($this->orderObject === false) {
+            $order = DataObject::get_one(
+                'SilvercartOrder',
+                sprintf(
+                    "sofortueberweisungTransactionID = '%s'",
+                    $transactionId
+                )
+            );
+
+            if ($order) {
+                $this->orderObject = $order;
+            }
+        }
+
+        return $this->orderObject;
+    }
 }

@@ -69,7 +69,8 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @var array
      */
     public $failedStatus = array(
-        'failed',
+        'error',
+        'loss',
     );
     /**
      * contains all strings of the saferpay answer which declare the
@@ -78,7 +79,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @var array
      */
     public $successStatus = array(
-        'successOrderStatus',
+        'received',
     );
 
     /**
@@ -227,14 +228,24 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
     public function processPaymentBeforeOrder() {
         require_once("../silvercart_payment_sofortueberweisung/thirdparty/sofortlib/sofortLib.php");
 
+        $checkoutData = $this->controller->getCombinedStepData();
+
+        if (isset($checkoutData['ShippingMethod'])) {
+            $this->shoppingCart->setShippingMethodID($checkoutData['ShippingMethod']);
+        }
+        if (isset($checkoutData['PaymentMethod'])) {
+            $this->shoppingCart->setPaymentMethodID($checkoutData['PaymentMethod']);
+        }
+
         $shoppingCart = $this->getShoppingCart();
         $reason       = $this->getReason($this->createSofortueberweisungToken());
+        $amount       = $shoppingCart->getAmountTotal()->getAmount();
 
         $shoppingCart->saveSofortueberweisungReason($reason);
 
         $Sofort = new SofortLib_Multipay($this->sofortueberweisungConfigKey);
         $Sofort->setSofortueberweisung();
-        $Sofort->setAmount($shoppingCart->getAmountTotal());
+        $Sofort->setAmount($amount);
         $Sofort->setReason($reason);
         $Sofort->setSuccessUrl($this->getReturnLink());
         $Sofort->setAbortUrl($this->getCancelLink());
@@ -255,6 +266,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
                 $position->SilvercartProduct()->getTaxRate()
             );
         }
+
 
         // add payment and shipping costs
         $taxes = $shoppingCart->getTaxRatesWithoutFeesAndCharges();
@@ -316,9 +328,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
             $transactionId = $Sofort->getTransactionID();
             $shoppingCart->saveSofortueberweisungTransactionID($transactionId);
             $paymentStatus = new SilvercartPaymentSofortueberweisungPaymentStatus();
-            $paymentStatus->status          = 'created';
-            $paymentStatus->transactionId   = $transactionId;
-            $paymentStatus->write();
+            $paymentStatus->createEvent($transactionId, 'created', $amount);
 
             $this->controller->addCompletedStep($this->controller->getCurrentStep());
             $this->controller->setCurrentStep($this->controller->getNextStep());
@@ -340,7 +350,14 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @since 15.11.2012
      */
     public function processReturnJumpFromPaymentProvider() {
-        $this->controller->NextStep();
+        $controller = Controller::curr();
+        $urlParams  = $controller->getURLParams();
+
+        if ($urlParams['Action'] == 'Cancel') {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -437,6 +454,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
 
         $requiredStatus = array(
             'payed'                       => _t('SilvercartOrderStatus.PAYED'),
+            'sofortueberweisung_loss'     => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_LOSS'),
             'sofortueberweisung_success'  => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_SUCCESS'),
             'sofortueberweisung_error'    => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_ERROR'),
             'sofortueberweisung_canceled' => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_CANCELED')
@@ -454,6 +472,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
                 $paymentMethod->suPaidOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "`Code`='payed'")->ID;
                 $paymentMethod->suSuccessOrderStatus = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_success'")->ID;
                 $paymentMethod->suFailedOrderStatus  = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_error'")->ID;
+                $paymentMethod->suLossOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_loss'")->ID;
 
                 $paymentMethod->write();
             }

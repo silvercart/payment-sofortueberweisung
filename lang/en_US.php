@@ -36,6 +36,7 @@ global $lang;
 
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_CANCELED'] = 'Sofortbanking canceled';
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_ERROR']    = 'Sofortbanking error';
+$lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_LOSS']     = 'Sofortbanking loss';
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_SUCCESS']  = 'Paid via Sofortbanking';
 
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['API']                                    = 'API data';
