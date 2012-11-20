@@ -57,20 +57,22 @@ class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
      * Set a payment status for the given transaction ID. Optionally an amount can
      * be given.
      *
-     * @param string $transactionId The transaction ID
-     * @param string $status        The status of the transaction
-     * @param float  $amount        Optional the amount
+     * @param string  $transactionId The transaction ID
+     * @param string  $status        The status of the transaction
+     * @param float   $amount        Optional the amount
+     * @param boolean $createOrder   Set to true to create an order object
      *
      * @return void
      *
      * @author Sascha Koehler <skoehler@pixeltricks.de>
      * @since 19.11.2012
      */
-    public function createEvent($transactionId, $status, $amount = 0.0) {
+    public function createEvent($transactionId, $status, $amount = 0.0, $createOrder = true) {
         // -------------------------------------------------------------------
         // Get currency
         // -------------------------------------------------------------------
-        $order = DataObject::get_one(
+        $currency = false;
+        $order    = DataObject::get_one(
             'SilvercartOrder',
             sprintf(
                 "sofortueberweisungTransactionID = '%s'",
@@ -79,7 +81,7 @@ class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
         );
 
         if ($order) {
-            $currency = $order->AmountTotal()->getCurrency();
+            $currency = $order->AmountTotalCurrency;
         } else {
             $cart = DataObject::get_one(
                 'SilvercartShoppingCart',
@@ -90,7 +92,7 @@ class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
             );
 
             if ($cart) {
-                $currency = $cart->getAmountTotal()->getCurrency();
+                $currency = $cart->AmountTotalCurrency;
             } else {
                 $member = Member::currentUser();
 
@@ -113,6 +115,24 @@ class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
         $this->status         = $status;
         $this->amountAmount   = $amount;
         $this->amountCurrency = $currency;
+
+        // -------------------------------------------------------------------
+        // Set order status if order is already available or queue it
+        // -------------------------------------------------------------------
+        $order = $this->getOrderObject($transactionId);
+
+        if ($order) {
+            $orderStatus = SilvercartPaymentSofortueberweisung::getOrderStatusFor($this->status);
+
+            if ($orderStatus) {
+                $order->setOrderStatus(
+                    $orderStatus
+                );
+            }
+        } else {
+            $this->queued = true;
+        }
+
         $this->write();
     }
 
@@ -129,11 +149,9 @@ class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
     public function hasOrderObject($transactionId) {
         $hasOrder = false;
         $order    = $this->getOrderObject($transactionId);
-
         if ($order) {
             $hasOrder = true;
         }
-
         return $hasOrder;
     }
 
@@ -148,20 +166,12 @@ class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
      * @since 19.11.2012
      */
     public function getOrderObject($transactionId) {
-        if ($this->orderObject === false) {
-            $order = DataObject::get_one(
-                'SilvercartOrder',
-                sprintf(
-                    "sofortueberweisungTransactionID = '%s'",
-                    $transactionId
-                )
-            );
-
-            if ($order) {
-                $this->orderObject = $order;
-            }
-        }
-
-        return $this->orderObject;
+        return DataObject::get_one(
+            'SilvercartOrder',
+            sprintf(
+                "sofortueberweisungTransactionID = '%s'",
+                $transactionId
+            )
+        );
     }
 }

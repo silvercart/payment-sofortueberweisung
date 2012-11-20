@@ -89,7 +89,8 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      */
     public static $db = array(
         'suCanceledOrderStatus'       => 'Int',
-        'suPaidOrderStatus'           => 'Int',
+        'suLossOrderStatus'           => 'Int',
+        'suPendingOrderStatus'        => 'Int',
         'suSuccessOrderStatus'        => 'Int',
 
         'sofortueberweisungConfigKey' => 'VarChar(100)',
@@ -130,7 +131,9 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
             $member->email.'-'.
             $shoppingCart->getAmountTotal()->getAmount().'-'.
             count($shoppingCart->SilvercartShoppingCartPositions()).'-'.
-            time()
+            $shoppingCart->AmountTotalAmount.'-'.
+            time().'-',
+            rand()
         );
 
         return $token;
@@ -185,17 +188,17 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
     public function getCMSFields($params = null) {
         $fields     = parent::getCMSFieldsForModules($params);
         $tabApi     = new Tab('SofortueberweisungAPI');
-        $tabUrls    = new Tab('SofortueberweisungURLs');
 
         $fields->fieldByName('Sections')->push($tabApi);
-        $fields->fieldByName('Sections')->push($tabUrls);
 
         // API Tabset ---------------------------------------------------------
-        $tabApiTabset   = new TabSet('APIOptions');
-        $tabApiTab      = new Tab(_t('SilvercartPaymentSofortueberweisung.API', 'API data'));
+        $tabApiTabset       = new TabSet('APIOptions');
+        $tabApiTab          = new Tab(_t('SilvercartPaymentSofortueberweisung.API'));
+        $tabOrderStatusTab  = new Tab(_t('SilvercartPaymentSofortueberweisung.ORDER_STATUS'));
 
         // API Tabs -----------------------------------------------------------
         $tabApiTabset->push($tabApiTab);
+        $tabApiTabset->push($tabOrderStatusTab);
 
         $tabApi->push($tabApiTabset);
 
@@ -206,7 +209,49 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
             )
         );
 
-        // URL fields ------------------------------------------------
+        // Order status fields ------------------------------------------------
+        $orderStatusList = SilvercartOrderStatus::getStatusList()->map(
+            'ID',
+            'Title',
+            _t("SilvercartEditAddressForm.EMPTYSTRING_PLEASECHOOSE")
+        );
+
+        $fields->addFieldToTab(
+            'Sections.Basic',
+            new DropdownField(
+                'suPendingOrderStatus',
+                _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_PENDING'),
+                $orderStatusList,
+                $this->suPendingOrderStatus
+            )
+        );
+        $fields->addFieldToTab(
+            'Sections.Basic',
+            new DropdownField(
+                'suSuccessOrderStatus',
+                _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_SUCCESS'),
+                $orderStatusList,
+                $this->suSuccessOrderStatus
+            )
+        );
+        $fields->addFieldToTab(
+            'Sections.Basic',
+            new DropdownField(
+                'suLossOrderStatus',
+                _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_LOSS'),
+                $orderStatusList,
+                $this->suLossOrderStatus
+            )
+        );
+        $fields->addFieldToTab(
+            'Sections.Basic',
+            new DropdownField(
+                'suCanceledOrderStatus',
+                _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_CANCELED'),
+                $orderStatusList,
+                $this->suCanceledOrderStatus
+            )
+        );
 
         return $fields;
     }
@@ -328,7 +373,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
             $transactionId = $Sofort->getTransactionID();
             $shoppingCart->saveSofortueberweisungTransactionID($transactionId);
             $paymentStatus = new SilvercartPaymentSofortueberweisungPaymentStatus();
-            $paymentStatus->createEvent($transactionId, 'created', $amount);
+            $paymentStatus->createEvent($transactionId, 'created', $amount, false);
 
             $this->controller->addCompletedStep($this->controller->getCurrentStep());
             $this->controller->setCurrentStep($this->controller->getNextStep());
@@ -403,6 +448,8 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @since 16.11.2012
      */
     public function getReason($key) {
+        $member = Member::currentUser();
+SilvercartTools::Log("getReason", $key);
         $key = ($key^0x47cb8a8c) ^ ($key<<12);
         $key = ($key^0x61a988bc) ^ ($key>>19);
         $key = ($key^0x78d2a3c8) ^ ($key<<5);
@@ -410,6 +457,9 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
         $key = ($key^0x2ea72dfe) ^ ($key<<3);
         $key = ($key^0x5ff1057d) ^ ($key>>16);
 
+        $key = substr($member->FirstName, 0, 1).
+               substr($member->Surname, 0, 1).'-'.$key;
+        SilvercartTools::Log("getReason", $key);
         return $key;
     }
 
@@ -423,6 +473,56 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      */
     public function getOrderConfirmationSubmitButtonTitle() {
         return _t('SilvercartPaymentSofortueberweisung.ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE');
+    }
+
+    /**
+     * Returns a SilvercartOrderStatus object for the given identifier.
+     *
+     * @param string $orderStatus The order status identifier (e.g. 'pending')
+     *
+     * @return mixed boolean|SilvercartOrderStatus
+     *
+     * @author Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 20.11.2012
+     */
+    public static function getOrderStatusFor($orderStatus) {
+        $paymentObj = DataObject::get_one('SilvercartPaymentSofortueberweisung');
+
+        switch ($orderStatus) {
+            case 'received':
+                print "Status received!\n";
+                $orderObj = DataObject::get_by_id(
+                    'SilvercartOrderStatus',
+                    $paymentObj->suSuccessOrderStatus
+                );
+                break;
+            case 'loss':
+                $orderObj = DataObject::get_by_id(
+                    'SilvercartOrderStatus',
+                    $paymentObj->suLossOrderStatus
+                );
+                break;
+            case 'canceled':
+            case 'refunded':
+                $orderObj = DataObject::get_by_id(
+                    'SilvercartOrderStatus',
+                    $paymentObj->suCanceledOrderStatus
+                );
+                break;
+            case 'pending':
+                $orderObj = DataObject::get_by_id(
+                    'SilvercartOrderStatus',
+                    $paymentObj->suPendingOrderStatus
+                );
+                break;
+            default:
+                $orderObj = DataObject::get_by_id(
+                    'SilvercartOrderStatus',
+                    $paymentObj->suOrderStatus
+                );
+        }
+
+        return $orderObj;
     }
 
     /**
@@ -453,11 +553,11 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
         parent::requireDefaultRecords();
 
         $requiredStatus = array(
-            'payed'                       => _t('SilvercartOrderStatus.PAYED'),
             'sofortueberweisung_loss'     => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_LOSS'),
             'sofortueberweisung_success'  => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_SUCCESS'),
             'sofortueberweisung_error'    => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_ERROR'),
-            'sofortueberweisung_canceled' => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_CANCELED')
+            'sofortueberweisung_canceled' => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_CANCELED'),
+            'sofortueberweisung_pending'  => _t('SilvercartOrderStatus.SOFORTUEBERWEISUNG_PENDING')
         );
         $paymentLogos = array(
             'Sofortueberweisung'  => SilvercartTools::getBaseURLSegment().'/silvercart_payment_sofortueberweisung/images/sofortueberweisung.png',
@@ -466,13 +566,13 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
         parent::createRequiredOrderStatus($requiredStatus);
         parent::createLogoImageObjects($paymentLogos, 'SilvercartPaymentSofortueberweisung');
 
-        $paymentMethods = DataObject::get('SilvercartPaymentSofortueberweisung', "`suPaidOrderStatus`=0");
+        $paymentMethods = DataObject::get('SilvercartPaymentSofortueberweisung', "`suSuccessOrderStatus`=0");
         if ($paymentMethods) {
             foreach ($paymentMethods as $paymentMethod) {
-                $paymentMethod->suPaidOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "`Code`='payed'")->ID;
                 $paymentMethod->suSuccessOrderStatus = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_success'")->ID;
                 $paymentMethod->suFailedOrderStatus  = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_error'")->ID;
                 $paymentMethod->suLossOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_loss'")->ID;
+                $paymentMethod->suPendingOrderStatus = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_pending'")->ID;
 
                 $paymentMethod->write();
             }

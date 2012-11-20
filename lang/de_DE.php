@@ -37,6 +37,7 @@ if (array_key_exists('de_DE', $lang) && is_array($lang['de_DE'])) {
 $lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_CANCELED']    = 'SOFORT Überweisung abgebrochen';
 $lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_ERROR']       = 'SOFORT Überweisung Fehler';
 $lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_LOSS']        = 'SOFORT Überweisung Verlust';
+$lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_PENDING']     = 'SOFORT Überweisung in Bearbeitung';
 $lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_SUCCESS']     = 'Bezahlt via SOFORT Überweisung';
 
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['API']                                    = 'API Daten';
@@ -45,7 +46,9 @@ $lang['de_DE']['SilvercartPaymentSofortueberweisung']['ENTER_DATA_AT_SOFORTUEBER
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['INFOTEXT_CHECKOUT']                      = 'Mit dem TÜV-zertifizierten Bezahlsystem SOFORT Überweisung können Sie ohne Registrierung, einfach und sicher, mit ihren gewohnten Online-Banking-Daten zahlen (PIN & TAN). <a href="https://documents.sofort.com/sue/kundeninformationen/" target="_blank">Mehr hier</a>.';
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE'] = 'Kaufen & weiter zur Bezahlung bei SOFORT Überweisung';
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_CANCELED']                   = 'Bestellstatus für Meldung "abgebrochen"';
-$lang['de_DE']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_PAYED']                      = 'Bestellstatus für Meldung "bezahlt"';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_LOSS']                       = 'Bestellstatus für Meldung "Verlust"';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_PENDING']                    = 'Bestellstatus für Meldung "in Bearbeitung"';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_SUCCESS']                    = 'Bestellstatus für Meldung "Erfolg"';
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['PLURALNAME']                             = 'SOFORT Überweisung';
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['SINGULARNAME']                           = 'SOFORT Überweisung';
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['SHOWLANGUAGES']                          = 'Anzeige der Sprachauswahl im Sofortüberweisung VT Menü';

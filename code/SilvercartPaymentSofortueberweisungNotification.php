@@ -89,7 +89,8 @@ class SilvercartPaymentSofortueberweisungNotification extends DataObject {
             $paymentStatus->createEvent(
                 $transactionId,
                 $transactionData->getStatus(),
-                $transactionData->getAmount()
+                $transactionData->getAmount(),
+                true
             );
         }
     }

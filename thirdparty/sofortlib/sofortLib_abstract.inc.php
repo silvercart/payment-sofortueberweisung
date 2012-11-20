@@ -45,7 +45,7 @@ class SofortLib_Abstract extends SofortLib {
 		$xmlRequest = ArrayToXml::render($requestData);
 		$this->_log($xmlRequest, ' XmlRequest -> ');
 		$xmlResponse = $this->_sendMessage($xmlRequest);
-		
+		SilvercartTools::Log('sendRequest', $xmlResponse);
 		try {
 			$this->_response = XmlToArray::render($xmlResponse);
 		} catch (Exception $e) {

@@ -37,6 +37,7 @@ global $lang;
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_CANCELED'] = 'Sofortbanking canceled';
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_ERROR']    = 'Sofortbanking error';
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_LOSS']     = 'Sofortbanking loss';
+$lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_PENDING']  = 'Sofortbanking pending';
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_SUCCESS']  = 'Paid via Sofortbanking';
 
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['API']                                    = 'API data';
@@ -44,7 +45,9 @@ $lang['en_US']['SilvercartPaymentSofortueberweisung']['CONFIG_KEY']             
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['ENTER_DATA_AT_SOFORTUEBERWEISUNG']       = 'Pay at Sofortbanking';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['INFOTEXT_CHECKOUT']                      = 'payment via Sofortbanking';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_CANCELED']                   = 'orderstatus for notification "canceled"';
-$lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_PAYED']                      = 'orderstatus for notification "payed"';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_LOSS']                       = 'orderstatus for notification "loss"';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_PENDING']                    = 'orderstatus for notification "pending"';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_SUCCESS']                    = 'orderstatus for notification "success"';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE'] = 'Proceed to payment via Sofortbanking';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['PLURALNAME']                             = 'Sofortbanking';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['SINGULARNAME']                           = 'Sofortbanking';
