@@ -416,6 +416,7 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
      * @since 15.11.2012
      */
     public function processPaymentAfterOrder($orderObj = array()) {
+        $this->order->sendConfirmationMail();
         return parent::processPaymentAfterOrder($orderObj);
     }
 
