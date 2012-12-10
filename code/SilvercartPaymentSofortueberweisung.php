@@ -292,9 +292,9 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
         $Sofort->setSofortueberweisung();
         $Sofort->setAmount($amount);
         $Sofort->setReason($reason);
-        $Sofort->setSuccessUrl($this->getReturnLink());
-        $Sofort->setAbortUrl($this->getCancelLink());
-        $Sofort->setTimeoutUrl($this->getCancelLink());
+        $Sofort->setSuccessUrl($this->getReturnLink().'?success=true');
+        $Sofort->setAbortUrl($this->getCancelLink().'?success=false');
+        $Sofort->setTimeoutUrl($this->getCancelLink().'?success=false');
         $Sofort->setNotificationUrl($this->getNotificationUrl());
 
         /*
@@ -397,8 +397,17 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
     public function processReturnJumpFromPaymentProvider() {
         $controller = Controller::curr();
         $urlParams  = $controller->getURLParams();
+        $success    = false;
 
-        if ($urlParams['Action'] == 'Cancel') {
+        if (array_key_exists('success', $_REQUEST)) {
+            if ($_REQUEST['success'] === 'true') {
+                $success = true;
+            }
+        }
+
+        if ($urlParams['Action'] == 'Cancel' ||
+            $success === false) {
+
             return false;
         } else {
             return true;
