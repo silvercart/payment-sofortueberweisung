@@ -164,83 +164,108 @@ class SilvercartPaymentSofortueberweisung extends SilvercartPaymentMethod {
     }
 
     /**
+     * i18n for field labels
+     *
+     * @param boolean $includerelations a boolean value to indicate if the labels returned include relation fields
+     *
+     * @return array
+     *
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 08.08.2014
+     */
+    public function fieldLabels($includerelations = true) {
+        return array_merge(
+                parent::fieldLabels($includerelations),
+                array(
+                    'suPendingOrderStatus'                         => _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_PENDING'),
+                    'suSuccessOrderStatus'                         => _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_SUCCESS'),
+                    'suLossOrderStatus'                            => _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_LOSS'),
+                    'suCanceledOrderStatus'                        => _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_CANCELED'),
+                    'TabOrderStatus'                               => _t('SilvercartPaymentSofortueberweisung.TabOrderStatus'),
+                    'sofortueberweisungConfigKey'                  => _t('SilvercartPaymentSofortueberweisung.CONFIG_KEY'),
+                    'sofortueberweisungAPIData'                    => _t('SilvercartPaymentSofortueberweisung.sofortueberweisungAPIData'),
+                    'SilvercartPaymentSofortueberweisungLanguages' => _t('Silvercart.TRANSLATIONS'),
+                )
+        );
+    }
+    
+    /**
+     * Adds the fields for the PayPal API
+     *
+     * @param FieldList $fields FieldList to add fields to
+     * @param bool      $forDev Add fields for dev or live mode?
+     * 
+     * @return void
+     */
+    protected function getFieldsForAPI($fields, $forDev = false) {
+        $mode = 'Live';
+        if ($forDev) {
+            return;
+        }
+        $fieldlist = array(
+            new TextField('sofortueberweisungConfigKey', $this->fieldLabel('sofortueberweisungConfigKey')),
+        );
+        
+        $apiDataToggle = ToggleCompositeField::create(
+                'sofortueberweisungAPI' . $mode,
+                $this->fieldLabel('sofortueberweisungAPIData') . ' "' . $this->fieldLabel('mode' . $mode) . '"',
+                $fieldlist
+        )->setHeadingLevel(4)->setStartClosed(true);
+        
+        $fields->addFieldToTab('Root.Basic', $apiDataToggle);
+    }
+    
+    /**
+     * Adds the fields for the PayPal order status
+     *
+     * @param FieldList $fields FieldList to add fields to
+     * 
+     * @return void
+     */
+    protected function getFieldsForOrderStatus($fields) {
+        $orderStatusList = SilvercartOrderStatus::get()->map('ID', 'Title');
+        $fieldlist = array(
+                $fields->dataFieldByName('orderStatus'),
+                new DropdownField('suPendingOrderStatus',  $this->fieldLabel('suPendingOrderStatus'),  $orderStatusList, $this->suPendingOrderStatus),
+                new DropdownField('suSuccessOrderStatus',  $this->fieldLabel('suSuccessOrderStatus'),  $orderStatusList, $this->suSuccessOrderStatus),
+                new DropdownField('suLossOrderStatus',     $this->fieldLabel('suLossOrderStatus'),     $orderStatusList, $this->suLossOrderStatus),
+                new DropdownField('suCanceledOrderStatus', $this->fieldLabel('suCanceledOrderStatus'), $orderStatusList, $this->suCanceledOrderStatus),
+        );
+        
+        $orderStatusDataToggle = ToggleCompositeField::create(
+                'OrderStatus',
+                $this->fieldLabel('TabOrderStatus'),
+                $fieldlist
+        )->setHeadingLevel(4)->setStartClosed(true);
+        
+        $fields->removeByName('orderStatus');
+        
+        $fields->addFieldToTab('Root.Basic', $orderStatusDataToggle);
+    }
+
+    /**
      * returns CMS fields
      *
      * @param mixed $params optional
      *
-     * @return FieldSet
-     *
-     * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @since 15.11.2012
+     * @return FieldList
      */
     public function getCMSFields($params = null) {
-        $fields     = parent::getCMSFieldsForModules($params);
-        $tabApi     = new Tab('SofortueberweisungAPI');
+        $fields = parent::getCMSFieldsForModules($params);
 
-        $fields->fieldByName('Sections')->push($tabApi);
-
-        // API Tabset ---------------------------------------------------------
-        $tabApiTabset       = new TabSet('APIOptions');
-        $tabApiTab          = new Tab(_t('SilvercartPaymentSofortueberweisung.API'));
-        $tabOrderStatusTab  = new Tab(_t('SilvercartPaymentSofortueberweisung.ORDER_STATUS'));
-
-        // API Tabs -----------------------------------------------------------
-        $tabApiTabset->push($tabApiTab);
-        $tabApiTabset->push($tabOrderStatusTab);
-
-        $tabApi->push($tabApiTabset);
-
-        // API Tab Dev fields -------------------------------------------------
-        $tabApiTab->setChildren(
-            new FieldSet(
-                new TextField('sofortueberweisungConfigKey', _t('SilvercartPaymentSofortueberweisung.CONFIG_KEY'))
-            )
+        $this->getFieldsForOrderStatus($fields);
+        $this->getFieldsForAPI($fields);
+        
+        $translations = new GridField(
+                'SilvercartPaymentSofortueberweisungLanguages',
+                $this->fieldLabel('SilvercartPaymentSofortueberweisungLanguages'),
+                $this->SilvercartPaymentSofortueberweisungLanguages(),
+                SilvercartGridFieldConfig_ExclusiveRelationEditor::create()
         );
-
-        // Order status fields ------------------------------------------------
-        $orderStatusList = SilvercartOrderStatus::getStatusList()->map(
-            'ID',
-            'Title',
-            _t("SilvercartEditAddressForm.EMPTYSTRING_PLEASECHOOSE")
-        );
-
-        $fields->addFieldToTab(
-            'Sections.Basic',
-            new DropdownField(
-                'suPendingOrderStatus',
-                _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_PENDING'),
-                $orderStatusList,
-                $this->suPendingOrderStatus
-            )
-        );
-        $fields->addFieldToTab(
-            'Sections.Basic',
-            new DropdownField(
-                'suSuccessOrderStatus',
-                _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_SUCCESS'),
-                $orderStatusList,
-                $this->suSuccessOrderStatus
-            )
-        );
-        $fields->addFieldToTab(
-            'Sections.Basic',
-            new DropdownField(
-                'suLossOrderStatus',
-                _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_LOSS'),
-                $orderStatusList,
-                $this->suLossOrderStatus
-            )
-        );
-        $fields->addFieldToTab(
-            'Sections.Basic',
-            new DropdownField(
-                'suCanceledOrderStatus',
-                _t('SilvercartPaymentSofortueberweisung.ORDERSTATUS_CANCELED'),
-                $orderStatusList,
-                $this->suCanceledOrderStatus
-            )
-        );
-
+        $fields->addFieldToTab('Root.Translations', $translations);
+        
+        $fields->removeByName('sofortueberweisungInfotextCheckout');
+        
         return $fields;
     }
 

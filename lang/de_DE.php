@@ -24,15 +24,7 @@
  * @ignore
  */
 
-i18n::include_locale_file('silvercart_payment_sofortueberweisung', 'en_US');
-
 global $lang;
-
-if (array_key_exists('de_DE', $lang) && is_array($lang['de_DE'])) {
-    $lang['de_DE'] = array_merge($lang['en_US'], $lang['de_DE']);
-} else {
-    $lang['de_DE'] = $lang['en_US'];
-}
 
 $lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_CANCELED']    = 'SOFORT Überweisung abgebrochen';
 $lang['de_DE']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_ERROR']       = 'SOFORT Überweisung Fehler';
@@ -52,6 +44,8 @@ $lang['de_DE']['SilvercartPaymentSofortueberweisung']['ORDERSTATUS_SUCCESS']    
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['PLURALNAME']                             = 'SOFORT Überweisung';
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['SINGULARNAME']                           = 'SOFORT Überweisung';
 $lang['de_DE']['SilvercartPaymentSofortueberweisung']['SHOWLANGUAGES']                          = 'Anzeige der Sprachauswahl im Sofortüberweisung VT Menü';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['TabOrderStatus']                         = 'Zuordnung Bestellstatus';
+$lang['de_DE']['SilvercartPaymentSofortueberweisung']['sofortueberweisungAPIData']              = 'SOFORT Überweisung Zugangsdaten';
 
 $lang['de_DE']['SilvercartPaymentSofortueberweisungLanguage']['SINGULARNAME'] = 'Übersetzung der Zahlart SOFORT Überweisung';
 $lang['de_DE']['SilvercartPaymentSofortueberweisungLanguage']['PLURALNAME']   = 'Übersetzungen der Zahlart SOFORT Überweisung';

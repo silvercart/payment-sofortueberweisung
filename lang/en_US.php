@@ -26,14 +26,6 @@
 
 global $lang;
 
-
-
-
-
-
-
-
-
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_CANCELED'] = 'Sofortbanking canceled';
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_ERROR']    = 'Sofortbanking error';
 $lang['en_US']['SilvercartOrderStatus']['SOFORTUEBERWEISUNG_LOSS']     = 'Sofortbanking loss';
@@ -52,6 +44,8 @@ $lang['en_US']['SilvercartPaymentSofortueberweisung']['ORDER_CONFIRMATION_SUBMIT
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['PLURALNAME']                             = 'Sofortbanking';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['SINGULARNAME']                           = 'Sofortbanking';
 $lang['en_US']['SilvercartPaymentSofortueberweisung']['SHOWLANGUAGES']                          = 'Display of the language selection in the menu of the Sofortbanking VT';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['TabOrderStatus']                         = 'Order status';
+$lang['en_US']['SilvercartPaymentSofortueberweisung']['sofortueberweisungAPIData']              = 'Sofortbanking login data';
 
 $lang['en_US']['SilvercartPaymentSofortueberweisungLanguage']['SINGULARNAME'] = 'Translation of the payment method Sofortbanking';
 $lang['en_US']['SilvercartPaymentSofortueberweisungLanguage']['PLURALNAME']   = 'Translations of the payment method Sofortbanking';

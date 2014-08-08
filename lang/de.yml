@@ -1,0 +1,25 @@
+de:
+  SilvercartOrderStatus:
+    SOFORTUEBERWEISUNG_CANCELED: "SOFORT Überweisung abgebrochen"
+    SOFORTUEBERWEISUNG_ERROR: "SOFORT Überweisung Fehler"
+    SOFORTUEBERWEISUNG_LOSS: "SOFORT Überweisung Verlust"
+    SOFORTUEBERWEISUNG_PENDING: "SOFORT Überweisung in Bearbeitung"
+    SOFORTUEBERWEISUNG_SUCCESS: "Bezahlt via SOFORT Überweisung"
+  SilvercartPaymentSofortueberweisung:
+    API: "API Daten"
+    CONFIG_KEY: "Konfigurations-Schlüssel"
+    ENTER_DATA_AT_SOFORTUEBERWEISUNG: "Bezahlung bei SOFORT Überweisung"
+    INFOTEXT_CHECKOUT: "Mit dem TÜV-zertifizierten Bezahlsystem SOFORT Überweisung können Sie ohne Registrierung, einfach und sicher, mit ihren gewohnten Online-Banking-Daten zahlen (PIN & TAN). <a href=\"https://documents.sofort.com/sue/kundeninformationen/\" target=\"_blank\">Mehr hier</a>."
+    ORDERSTATUS_CANCELED: "Bestellstatus für Meldung \"abgebrochen\""
+    ORDERSTATUS_LOSS: "Bestellstatus für Meldung \"Verlust\""
+    ORDERSTATUS_PENDING: "Bestellstatus für Meldung \"in Bearbeitung\""
+    ORDERSTATUS_SUCCESS: "Bestellstatus für Meldung \"Erfolg\""
+    ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE: "Kaufen & weiter zur Bezahlung bei SOFORT Überweisung"
+    PLURALNAME: "SOFORT Überweisung"
+    SHOWLANGUAGES: "Anzeige der Sprachauswahl im Sofortüberweisung VT Menü"
+    SINGULARNAME: "SOFORT Überweisung"
+    TabOrderStatus: "Zuordnung Bestellstatus"
+    sofortueberweisungAPIData: "SOFORT Überweisung Zugangsdaten"
+  SilvercartPaymentSofortueberweisungLanguage:
+    PLURALNAME: "Übersetzungen der Zahlart SOFORT Überweisung"
+    SINGULARNAME: "Übersetzung der Zahlart SOFORT Überweisung"

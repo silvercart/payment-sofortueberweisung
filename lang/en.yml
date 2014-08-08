@@ -1,0 +1,25 @@
+en:
+  SilvercartOrderStatus:
+    SOFORTUEBERWEISUNG_CANCELED: "Sofortbanking canceled"
+    SOFORTUEBERWEISUNG_ERROR: "Sofortbanking error"
+    SOFORTUEBERWEISUNG_LOSS: "Sofortbanking loss"
+    SOFORTUEBERWEISUNG_PENDING: "Sofortbanking pending"
+    SOFORTUEBERWEISUNG_SUCCESS: "Paid via Sofortbanking"
+  SilvercartPaymentSofortueberweisung:
+    API: "API data"
+    CONFIG_KEY: "Config key"
+    ENTER_DATA_AT_SOFORTUEBERWEISUNG: "Pay at Sofortbanking"
+    INFOTEXT_CHECKOUT: "payment via Sofortbanking"
+    ORDERSTATUS_CANCELED: "orderstatus for notification \"canceled\""
+    ORDERSTATUS_LOSS: "orderstatus for notification \"loss\""
+    ORDERSTATUS_PENDING: "orderstatus for notification \"pending\""
+    ORDERSTATUS_SUCCESS: "orderstatus for notification \"success\""
+    ORDER_CONFIRMATION_SUBMIT_BUTTON_TITLE: "Proceed to payment via Sofortbanking"
+    PLURALNAME: "Sofortbanking"
+    SHOWLANGUAGES: "Display of the language selection in the menu of the Sofortbanking VT"
+    SINGULARNAME: "Sofortbanking"
+    TabOrderStatus: "Order status"
+    sofortueberweisungAPIData: "Sofortbanking login data"
+  SilvercartPaymentSofortueberweisungLanguage:
+    PLURALNAME: "Translations of the payment method Sofortbanking"
+    SINGULARNAME: "Translation of the payment method Sofortbanking"
