@@ -35,16 +35,12 @@ class SilvercartPaymentSofortueberweisungOrderPositionPlugin extends DataExtensi
     public function pluginConvertShoppingCartPositionsToOrderPositions($arguments, &$silvercartOrder) {
         $order = $arguments[0];
 
-        $lastTransactions = DataObject::get(
-            'SilvercartPaymentSofortueberweisungPaymentStatus',
-            sprintf(
-                "transactionId = '%s' AND
-                 queued = 1",
-                $order->getSofortueberweisungTransactionID()
-            ),
-            true,
-            'CREATED ASC'
-        );
+        $lastTransactions = SilvercartPaymentSofortueberweisungPaymentStatus::get()
+                ->filter(array(
+                    'transactionId' => $order->getSofortueberweisungTransactionID(),
+                    'queued' => 1,
+                ))
+                ->sort('CREATED ASC');
 
         if ($lastTransactions) {
             foreach ($lastTransactions as $transaction) {

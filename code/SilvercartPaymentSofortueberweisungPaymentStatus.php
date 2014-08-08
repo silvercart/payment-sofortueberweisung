@@ -52,32 +52,21 @@ class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
      *
      * @return void
      *
-     * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @since 19.11.2012
+     * @author Sebastian Diel <sdiel@pixeltricks.de>,
+     *         Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 08.08.2014
      */
     public function createEvent($transactionId, $status, $amount = 0.0, $createOrder = true) {
         // -------------------------------------------------------------------
         // Get currency
         // -------------------------------------------------------------------
         $currency = false;
-        $order    = DataObject::get_one(
-            'SilvercartOrder',
-            sprintf(
-                "sofortueberweisungTransactionID = '%s'",
-                $transactionId
-            )
-        );
+        $order    = SilvercartOrder::get()->filter('sofortueberweisungTransactionID', $transactionId)->first();
 
         if ($order) {
             $currency = $order->AmountTotalCurrency;
         } else {
-            $cart = DataObject::get_one(
-                'SilvercartShoppingCart',
-                sprintf(
-                    "sofortueberweisungTransactionID = '%s'",
-                    $transactionId
-                )
-            );
+            $cart = SilvercartShoppingCart::get()->filter('sofortueberweisungTransactionID', $transactionId)->first();
 
             if ($cart) {
                 $currency = $cart->AmountTotalCurrency;
@@ -150,16 +139,10 @@ class SilvercartPaymentSofortueberweisungPaymentStatus extends DataObject {
      *
      * @return SilvercartOrder
      *
-     * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @since 19.11.2012
+     * @author Sebastian Diel <sdiel@pixeltricks.de>
+     * @since 08.08.2014
      */
     public function getOrderObject($transactionId) {
-        return DataObject::get_one(
-            'SilvercartOrder',
-            sprintf(
-                "sofortueberweisungTransactionID = '%s'",
-                $transactionId
-            )
-        );
+        return SilvercartOrder::get()->filter('sofortueberweisungTransactionID', $transactionId)->first();
     }
 }

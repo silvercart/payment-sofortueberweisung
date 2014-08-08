@@ -25,18 +25,16 @@ class SilvercartPaymentSofortueberweisungCheckoutFormStep4 extends SilvercartChe
      * Process the current step
      *
      * @return void
-     *
-     * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @since 15.11.2012
+     * 
+     * @author Sebastian Diel <sdiel@pixeltricks.de>,
+     *         Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 08.08.2014
      */
     public function process() {
         if (parent::process()) {
             $paymentSuccessful  = false;
             $checkoutData       = $this->controller->getCombinedStepData();
-            $orderObj           = DataObject::get_by_id(
-                'SilvercartOrder',
-                $checkoutData['orderId']
-            );
+            $orderObj           = SilvercartOrder::get()->byId($checkoutData['orderId']);
 
             if ($this->paymentMethodObj &&
                 $orderObj) {

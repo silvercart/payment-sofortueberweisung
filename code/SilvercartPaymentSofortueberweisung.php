@@ -480,44 +480,30 @@ SilvercartTools::Log("getReason", $key);
      *
      * @return mixed boolean|SilvercartOrderStatus
      *
-     * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @since 20.11.2012
+     * @author Sebastian Diel <sdiel@pixeltricks.de>,
+     *         Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 08.08.2014
      */
     public static function getOrderStatusFor($orderStatus) {
-        $paymentObj = DataObject::get_one('SilvercartPaymentSofortueberweisung');
+        $paymentObj = SilvercartPaymentSofortueberweisung::get()->first();
 
         switch ($orderStatus) {
             case 'received':
                 print "Status received!\n";
-                $orderObj = DataObject::get_by_id(
-                    'SilvercartOrderStatus',
-                    $paymentObj->suSuccessOrderStatus
-                );
+                $orderObj = SilvercartOrderStatus::get()->byID($paymentObj->suSuccessOrderStatus);
                 break;
             case 'loss':
-                $orderObj = DataObject::get_by_id(
-                    'SilvercartOrderStatus',
-                    $paymentObj->suLossOrderStatus
-                );
+                $orderObj = SilvercartOrderStatus::get()->byID($paymentObj->suLossOrderStatus);
                 break;
             case 'canceled':
             case 'refunded':
-                $orderObj = DataObject::get_by_id(
-                    'SilvercartOrderStatus',
-                    $paymentObj->suCanceledOrderStatus
-                );
+                $orderObj = SilvercartOrderStatus::get()->byID($paymentObj->suCanceledOrderStatus);
                 break;
             case 'pending':
-                $orderObj = DataObject::get_by_id(
-                    'SilvercartOrderStatus',
-                    $paymentObj->suPendingOrderStatus
-                );
+                $orderObj = SilvercartOrderStatus::get()->byID($paymentObj->suPendingOrderStatus);
                 break;
             default:
-                $orderObj = DataObject::get_by_id(
-                    'SilvercartOrderStatus',
-                    $paymentObj->suOrderStatus
-                );
+                $orderObj = SilvercartOrderStatus::get()->byID($paymentObj->suOrderStatus);
         }
 
         return $orderObj;
@@ -544,8 +530,9 @@ SilvercartTools::Log("getReason", $key);
      *
      * @return void
      *
-     * @author Sascha Koehler <skoehler@standardized.de>
-     * @since 15.11.2012
+     * @author Sebastian Diel <sdiel@pixeltricks.de>,
+     *         Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 08.08.2014
      */
     public function requireDefaultRecords() {
         parent::requireDefaultRecords();
@@ -564,13 +551,14 @@ SilvercartTools::Log("getReason", $key);
         parent::createRequiredOrderStatus($requiredStatus);
         parent::createLogoImageObjects($paymentLogos, 'SilvercartPaymentSofortueberweisung');
 
-        $paymentMethods = DataObject::get('SilvercartPaymentSofortueberweisung', "`suSuccessOrderStatus`=0");
-        if ($paymentMethods) {
+        $paymentMethods = SilvercartPaymentSofortueberweisung::get()->filter('suSuccessOrderStatus', 0);
+        if ($paymentMethods instanceof DataList &&
+            $paymentMethods->exists()) {
             foreach ($paymentMethods as $paymentMethod) {
-                $paymentMethod->suSuccessOrderStatus = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_success'")->ID;
-                $paymentMethod->suFailedOrderStatus  = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_error'")->ID;
-                $paymentMethod->suLossOrderStatus    = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_loss'")->ID;
-                $paymentMethod->suPendingOrderStatus = DataObject::get_one('SilvercartOrderStatus', "`Code`='sofortueberweisung_pending'")->ID;
+                $paymentMethod->suSuccessOrderStatus = SilvercartOrderStatus::get()->filter('Code', 'sofortueberweisung_success')->first()->ID;
+                $paymentMethod->suFailedOrderStatus  = SilvercartOrderStatus::get()->filter('Code', 'sofortueberweisung_error')->first()->ID;
+                $paymentMethod->suLossOrderStatus    = SilvercartOrderStatus::get()->filter('Code', 'sofortueberweisung_loss')->first()->ID;
+                $paymentMethod->suPendingOrderStatus = SilvercartOrderStatus::get()->filter('Code', 'sofortueberweisung_pending')->first()->ID;
 
                 $paymentMethod->write();
             }

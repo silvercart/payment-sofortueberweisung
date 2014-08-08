@@ -37,18 +37,13 @@ class SilvercartPaymentSofortueberweisungNotification extends DataObject {
      *
      * @return void
      *
-     * @author Sascha Koehler <skoehler@pixeltricks.de>
-     * @since 15.11.2012
+     * @author Sebastian Diel <sdiel@pixeltricks.de>,
+     *         Sascha Koehler <skoehler@pixeltricks.de>
+     * @since 08.08.2014
      */
     public function process() {
         // load payment module
-        $paymentModule = DataObject::get_one(
-            'SilvercartPaymentMethod',
-            sprintf(
-                "`ClassName` = 'SilvercartPayment%s'",
-                $this->moduleName
-            )
-        );
+        $paymentModule = SilvercartPaymentMethod::get()->filter('ClassName', 'SilvercartPayment' . $this->moduleName)->first();
 
         if ($paymentModule) {
             require_once("../silvercart_payment_sofortueberweisung/thirdparty/sofortlib/sofortLib.php");
